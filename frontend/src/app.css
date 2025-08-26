@@ -1,0 +1,50 @@
+:root {
+  --main-bg-color: #242424;
+  --main-fg-color: rgb(255 255 255 / 87%);
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+
+  background-color: var(--main-bg-color);
+  color: var(--main-fg-color);
+}
+
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  justify-content: center;
+  width: 100vw;
+  min-height: 100vh;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+#app {
+  max-width: 600px;
+  text-align: center;
+}
+
+button:hover:not(:disabled) {
+  cursor: pointer;
+}
+
+
+.green-btn {
+  background-color: hsl(144, 100%, 40%);
+}
+.green-btn:hover {
+  background-color: hsl(144, 100%, 35%);
+}
+.green-btn:active {
+  background-color: hsl(144, 100%, 30%);
+}
+
+.red-btn {
+  background-color: hsl(2, 80%, 50%);
+}
+.red-btn:hover {
+  background-color: hsl(2, 80%, 45%);
+}
+.red-btn:active {
+  background-color: hsl(2, 80%, 40%);
+}
