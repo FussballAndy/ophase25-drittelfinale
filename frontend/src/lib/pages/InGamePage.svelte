@@ -11,17 +11,24 @@
     </div>
     <div class="path-wrapper">
         <span>Dein Pfad:</span>
-        <Card background={true}>
-            <div class="inner-wrapper">
-                <div class="path-info">
-                    <span class="path-title">Raketen</span>
-                    <span class="path-room">S1|03 205</span>
+        <div class="path">
+            <Card background={true}>
+                <div class="inner-wrapper">
+                    <div class="path-info">
+                        <span class="path-title">Raketen</span>
+                        <span class="path-room">S1|03 205</span>
+                    </div>
                 </div>
-                <div class="path-more">
-                    &gt;
+            </Card>
+            <Card background={true}>
+                <div class="inner-wrapper">
+                    <div class="path-info">
+                        <span class="path-title">Raketen</span>
+                        <span class="path-room">S1|03 205</span>
+                    </div>
                 </div>
-            </div>
-        </Card>
+            </Card>
+        </div>
     </div>
 </div>
 
@@ -40,6 +47,10 @@
         gap: 8em;
         flex: 1;
     }
+    .path {
+        display: flex;
+        flex-direction: column;
+    }
     .path-info {
         display: flex;
         flex-direction: column;
@@ -51,14 +62,5 @@
     .path-title {
         font-weight: 500;
         font-size: 1.1em;
-    }
-    .path-more {
-        display: flex;
-        border: 1px solid var(--main-fg-color);
-        border-radius: 100%;
-        width: 2em;
-        height: 2em;
-        justify-content: center;
-        align-items: center;
     }
 </style>

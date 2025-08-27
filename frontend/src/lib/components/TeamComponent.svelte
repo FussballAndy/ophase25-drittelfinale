@@ -31,7 +31,8 @@
         display: flex;
         flex-direction: row;
         align-items: center;
-        gap: 2em;
+        justify-content: space-between;
+        flex: 1;
     }
     .spacer {
         display: flex;
