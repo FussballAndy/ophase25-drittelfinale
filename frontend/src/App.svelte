@@ -4,6 +4,11 @@
     import InGamePage from "./lib/pages/InGamePage.svelte";
     import UserPage from "./lib/pages/UserPage.svelte";
     import page from "./lib/pageStore";
+
+    function advance(e: Event) {
+        e.preventDefault();
+        page.update(n => n + 1);
+    }
 </script>
 
 <main>
@@ -17,6 +22,7 @@
     {:else}
         Unknown page {$page}
     {/if}
+    <button onclick={advance}>Advance</button>
 </main>
 
 <style>

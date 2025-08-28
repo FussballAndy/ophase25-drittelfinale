@@ -10,10 +10,10 @@
 </script>
 
 <Card background={isCurrent}>
-    <div class="inner-wrapper">
-        <div class="spacer">
+    <div class="inner-wrapper flex:row">
+        <div class="spacer flex:row">
             <div class="icon"></div>
-            <div class="info">
+            <div class="flex:column">
                 <span class="name">Team {name}</span>
                 {#if showPlayers}
                     <span class="play">X / Y Spieler</span>
@@ -28,15 +28,11 @@
 
 <style>
     .inner-wrapper {
-        display: flex;
-        flex-direction: row;
         align-items: center;
         justify-content: space-between;
         flex: 1;
     }
     .spacer {
-        display: flex;
-        flex-direction: row;
         align-items: center;
         gap: 0.6em;
     }
@@ -47,10 +43,6 @@
         height: 2.5em;
         background-color: green;
         margin: 0.1em;
-    }
-    .info {
-        display: flex;
-        flex-direction: column;
     }
     .name {
         font-size: 1.1em;

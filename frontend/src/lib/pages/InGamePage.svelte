@@ -1,7 +1,49 @@
 <script lang="ts">
-    import Card from "../components/Card.svelte";
+    import { onDestroy } from "svelte";
+    import PathComponent from "../components/PathComponent.svelte";
     import TeamComponent from "../components/TeamComponent.svelte";
 
+    let path = [{
+        title: "Raketen",
+        room: "S1|03 205",
+        google: "https://maps.app.goo.gl/MNNjYW1AUyPqFXUFA",
+        apple: "https://maps.apple/p/5GWcLBK9CdcD6f",
+        start: Date.UTC(2025, 7, 28, 20, 15, 0, 0),
+        end: Date.UTC(2025, 7, 28, 20, 45, 0, 0),
+        prev_end: 0,
+    },
+    {
+        title: "Musikraten",
+        room: "S1|03 205",
+        google: "https://maps.app.goo.gl/MNNjYW1AUyPqFXUFA",
+        apple: "https://maps.apple/p/5GWcLBK9CdcD6f",
+        start: Date.UTC(2025, 7, 28, 20, 50, 0, 0),
+        end: Date.UTC(2025, 7, 28, 21, 20, 0, 0),
+        prev_end: Date.UTC(2025, 7, 28, 20, 45, 0, 0),
+    },
+    {
+        title: "Musikraten",
+        room: "S1|03 205",
+        google: "https://maps.app.goo.gl/MNNjYW1AUyPqFXUFA",
+        apple: "https://maps.apple/p/5GWcLBK9CdcD6f",
+        start: Date.UTC(2025, 7, 28, 20, 50, 0, 0),
+        end: Date.UTC(2025, 7, 28, 21, 20, 0, 0),
+        prev_end: Date.UTC(2025, 7, 28, 20, 45, 0, 0),
+    },
+    {
+        title: "Musikraten",
+        room: "S1|03 205",
+        google: "https://maps.app.goo.gl/MNNjYW1AUyPqFXUFA",
+        apple: "https://maps.apple/p/5GWcLBK9CdcD6f",
+        start: Date.UTC(2025, 7, 28, 20, 50, 0, 0),
+        end: Date.UTC(2025, 7, 28, 21, 20, 0, 0),
+        prev_end: Date.UTC(2025, 7, 28, 20, 45, 0, 0),
+    }]
+
+    let ms = 1000 * 60
+    let time = $state(Date.now())
+    let inter = setInterval(() => time = Date.now(), ms);
+    onDestroy(() => clearInterval(inter))
 </script>
 
 <div class="surr">
@@ -12,22 +54,9 @@
     <div class="path-wrapper">
         <span>Dein Pfad:</span>
         <div class="path">
-            <Card background={true}>
-                <div class="inner-wrapper">
-                    <div class="path-info">
-                        <span class="path-title">Raketen</span>
-                        <span class="path-room">S1|03 205</span>
-                    </div>
-                </div>
-            </Card>
-            <Card background={true}>
-                <div class="inner-wrapper">
-                    <div class="path-info">
-                        <span class="path-title">Raketen</span>
-                        <span class="path-room">S1|03 205</span>
-                    </div>
-                </div>
-            </Card>
+            {#each path as p, idx (idx)}
+                <PathComponent {...p} />
+            {/each}
         </div>
     </div>
 </div>
@@ -38,29 +67,12 @@
         flex-direction: column;
         text-align: left;
     }
-    .inner-wrapper {
-        display: flex;
-        flex-direction: row;
-        padding: 0.3em;
-        justify-content: space-between;
-        align-items: center;
-        gap: 8em;
-        flex: 1;
-    }
     .path {
-        display: flex;
-        flex-direction: column;
-    }
-    .path-info {
         display: flex;
         flex-direction: column;
     }
     .team-wrapper {
         display: flex;
         flex-direction: column;
-    }
-    .path-title {
-        font-weight: 500;
-        font-size: 1.1em;
     }
 </style>

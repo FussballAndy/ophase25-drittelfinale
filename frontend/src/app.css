@@ -52,3 +52,12 @@ button:hover:not(:disabled) {
 .red-btn:active {
   background-color: hsl(2, 80%, 40%);
 }
+
+.flex\:column {
+  display: flex;
+  flex-direction: column;
+}
+.flex\:row {
+  display: flex;
+  flex-direction: row;
+}
