@@ -46,16 +46,16 @@
     onDestroy(() => clearInterval(inter))
 </script>
 
-<div class="surr">
+<div class="surr flex:column">
     <div class="team-wrapper">
         <span>Dein Team:</span>
         <TeamComponent name="1" showPlayers={false} isCurrent={true} />
     </div>
-    <div class="path-wrapper">
+    <div class="flex:column">
         <span>Dein Pfad:</span>
-        <div class="path">
+        <div class="flex:column">
             {#each path as p, idx (idx)}
-                <PathComponent {...p} />
+                <PathComponent {...p} now={time} />
             {/each}
         </div>
     </div>
@@ -63,16 +63,6 @@
 
 <style>
     .surr {
-        display: flex;
-        flex-direction: column;
         text-align: left;
-    }
-    .path {
-        display: flex;
-        flex-direction: column;
-    }
-    .team-wrapper {
-        display: flex;
-        flex-direction: column;
     }
 </style>

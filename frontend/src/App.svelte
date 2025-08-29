@@ -1,6 +1,7 @@
 <script lang="ts">
     import "./app.css";
     import CookiesPage from "./lib/pages/CookiesPage.svelte";
+    import DrittelPage from "./lib/pages/DrittelPage.svelte";
     import InGamePage from "./lib/pages/InGamePage.svelte";
     import UserPage from "./lib/pages/UserPage.svelte";
     import page from "./lib/pageStore";
@@ -19,6 +20,8 @@
         <UserPage />
     {:else if $page == 2}
         <InGamePage />
+    {:else if $page == 3}
+        <DrittelPage />
     {:else}
         Unknown page {$page}
     {/if}

@@ -17,8 +17,8 @@
         <TeamComponent name={$change} isChanging={true} changer={change} />
         <span>Wirklich wechseln?</span>
         <div class="change flex:row">
-            <button class="change-btn green-btn">Ja</button>
-            <button class="change-btn red-btn" onclick={() => change.set(null)}>Nein</button>
+            <button class="filled-btn green-btn">Ja</button>
+            <button class="filled-btn red-btn" onclick={() => change.set(null)}>Nein</button>
         </div>
     {/if}
 </div>
@@ -30,13 +30,5 @@
     .change {
         justify-content: center;
         gap: 0.6em;
-    }
-    .change-btn {
-        flex: 1;
-        border: none;
-        border-radius: 0.25em;
-        font-size: inherit;
-        padding: 0.4em;
-        margin: 0.3em 0;
     }
 </style>

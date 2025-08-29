@@ -1,7 +1,6 @@
 <script lang="ts">
     import Card from "./Card.svelte";
-    let {title, room, google, apple, start, end, prev_end} = $props();
-    let now = Date.now();
+    let {title, room, google, apple, start, end, prev_end, now} = $props();
     let isCurrent = prev_end <= now && now < end;
     let start_time = new Date(start);
     let end_time = new Date(end);
