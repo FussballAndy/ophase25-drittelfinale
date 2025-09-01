@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WS Example</title>
+</head>
+<body>
+    <div id="app" style="display: flex; flex-direction: column;">
+        <div style="display: flex; flex-direction: row;">
+            <input id="msg" type="text">
+            <button id="send">Send</button>
+        </div>
+    </div>
+    <script>
+        const app = document.getElementById("app")
+        const msgInput = document.getElementById("msg")
+        const sendBtn = document.getElementById("send")
+        let websocket = new WebSocket("wss://localhost:5000/ws")
+        sendBtn.addEventListener('click', (e) => {
+            websocket.send(msgInput.value)
+            msgInput.value = ""
+        })
+        websocket.onmessage = (e) => {
+            const newSpan = document.createElement("span")
+            newSpan.innerText = e.data
+            app.appendChild(newSpan)
+            const msgData = JSON.parse(e.data)
+            if("session" in msgData) {
+                document.cookie = `session=${msgData.session}`
+            }
+        }
+        websocket.onclose = (e) => {
+            console.log("Closed WebSocket")
+        }
+    </script>
+</body>
+</html>
