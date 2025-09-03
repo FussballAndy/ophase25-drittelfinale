@@ -26,13 +26,16 @@
             newSpan.innerText = e.data
             app.appendChild(newSpan)
             const msgData = JSON.parse(e.data)
-            if("session" in msgData) {
-                document.cookie = `session=${msgData.session}`
+            if(msgData.type === "session") {
+                document.cookie = `session=${msgData.data}`
             }
         }
         websocket.onclose = (e) => {
             console.log("Closed WebSocket")
         }
+        setTimeout(() => {
+            websocket.send(JSON.stringify({type: "teamsw", data: 1}))
+        }, 5000)
     </script>
 </body>
 </html>

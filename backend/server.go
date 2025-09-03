@@ -1,8 +1,6 @@
 package main
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"log"
 	"net/http"
 	"os"
@@ -16,22 +14,21 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-var userInfo map[string]ClientLevel = make(map[string]ClientLevel)
-var clients []*Client = make([]*Client, 0)
+var clientMgr *ClientManager = NewClientManager()
+var teamMgr *TeamManager = NewTeamManager(25)
 
 func main() {
-	userInfo["ADMIN-OPHASE25"] = Admin
 	dat, err := os.ReadFile("client.html")
 	if err != nil {
 		log.Println(err)
 		return
 	}
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/{$}", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(dat))
 	})
 	mux.HandleFunc("/ws", HandleWebSocket)
-	err = http3.ListenAndServeTLS("0.0.0.0:5000", "cert.pem", "key.pem", mux)
+	err = http3.ListenAndServeTLS("127.0.0.1:5000", "cert.pem", "key.pem", mux)
 	if err != nil {
 		log.Printf("Encountered the following error: %s", err)
 	}
@@ -44,50 +41,26 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var client *Client = nil
+	sessionToken := ""
 	if sess, err := r.Cookie("session"); err == nil {
-		sess := sess.Value
-		log.Printf("Received cookie: %s", sess)
-		level, ok := userInfo[sess]
-		if ok {
-			client = &Client{
-				conn:  conn,
-				level: level,
-			}
-		}
+		sessionToken = sess.Value
 	}
-	if client == nil {
-		sess, err := GenerateSession()
-		if err != nil {
-			log.Printf("Failed to generate session: %s", err)
-			return
-		}
-		userInfo[sess] = User
-		client = &Client{
-			conn:  conn,
-			level: User,
-		}
-		data := JSONNewSession{
-			Session: sess,
-		}
-
-		if err := conn.WriteJSON(data); err != nil {
-			log.Printf("WebSocket send failed: %s", err)
-			return
-		}
+	client, err := clientMgr.Create(conn, sessionToken)
+	if err != nil {
+		log.Printf("Failed to generate session: %s", err)
+		conn.Close()
+		return
 	}
 
-	clients = append(clients, client)
+	team := teamMgr.AllocateTeam(client.id)
+
+	announcement := JSONData{
+		DataType: TeamAnnouncementType,
+		Data:     team,
+	}
+	if !client.SendMessage(announcement) {
+		return
+	}
 
 	client.HandleMessages()
-}
-
-var SessionLength = 16 // bytes
-
-func GenerateSession() (string, error) {
-	bytes := make([]byte, SessionLength)
-	if _, err := rand.Read(bytes); err != nil {
-		return "", err
-	}
-	return hex.EncodeToString(bytes), nil
 }
