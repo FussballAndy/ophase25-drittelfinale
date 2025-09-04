@@ -69,6 +69,14 @@ func (m *ClientManager) Create(conn *websocket.Conn, sess string) (*Client, erro
 	return client, nil
 }
 
+func (m *ClientManager) CopyClients() []*Client {
+	m.mu.Lock()
+	tmp := make([]*Client, len(m.Clients))
+	copy(tmp, m.Clients)
+	m.mu.Unlock()
+	return tmp
+}
+
 var SessionLength = 16 // bytes
 
 func GenerateSession() (string, error) {

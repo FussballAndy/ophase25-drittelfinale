@@ -5,6 +5,11 @@ type JSONData struct {
 	Data     any    `json:"data"`
 }
 
+type JSONTeams struct {
+	Capacity uint16   `json:"capacity"`
+	Member   []uint16 `json:"member"`
+}
+
 const (
 	SessionType          string = "session"
 	TeamAnnouncementType string = "teaman"

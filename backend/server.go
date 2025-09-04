@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/quic-go/quic-go/http3"
@@ -23,6 +24,22 @@ func main() {
 		log.Println(err)
 		return
 	}
+
+	go func() {
+		for range time.Tick(time.Second * 1) {
+			teamJson := JSONData{
+				DataType: TeamsType,
+				Data:     teamMgr.GetTeamJSON(),
+			}
+			clients := clientMgr.CopyClients()
+			for _, client := range clients {
+				if client.level != Tutor {
+					client.SendMessage(teamJson)
+				}
+			}
+		}
+	}()
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/{$}", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(dat))
