@@ -34,7 +34,7 @@
             console.log("Closed WebSocket")
         }
         setTimeout(() => {
-            websocket.send(JSON.stringify({type: "teamsw", data: 1}))
+            websocket.send(JSON.stringify({type: "team_switch", data: 1}))
         }, 5000)
     </script>
 </body>

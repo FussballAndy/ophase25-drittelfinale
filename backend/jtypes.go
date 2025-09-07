@@ -11,8 +11,17 @@ type JSONTeams struct {
 }
 
 const (
-	SessionType          string = "session"
-	TeamAnnouncementType string = "teaman"
-	TeamSwitchType       string = "teamsw"
-	TeamsType            string = "teams"
+	SessionType           string = "session"
+	TeamAnnouncementType  string = "team_announcement"
+	TeamSwitchType        string = "team_switch"
+	TeamsType             string = "teams"
+	ChangePhaseType       string = "change_phase"
+	AddGameType           string = "game_add"
+	RemoveGameType        string = "game_remove"
+	PathAnnouncementType  string = "path"
+	FinalQuestionType     string = "final_question"
+	FinalAnswerType       string = "final_answer"
+	GameWinnerType        string = "game_winner"
+	SGameWinnerType       string = "special_game_winner"
+	ConnectionUpgradeType string = "upgrade"
 )

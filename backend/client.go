@@ -53,5 +53,7 @@ func (c *Client) HandleMessage(content *JSONData) {
 		} else {
 			log.Printf("Wrong data type: %s", reflect.TypeOf(content.Data))
 		}
+	default:
+		log.Printf("Unknown message type: %s", content.DataType)
 	}
 }
