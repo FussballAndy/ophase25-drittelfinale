@@ -38,7 +38,6 @@ button:hover:not(:disabled) {
   border-radius: 0.25em;
   font-size: inherit;
   padding: 0.4em;
-  margin: 0.3em 0;
 }
 
 .green-btn {
@@ -68,4 +67,25 @@ button:hover:not(:disabled) {
 .flex\:row {
   display: flex;
   flex-direction: row;
+}
+
+input[type="text"] {
+  font-size: inherit;
+  margin: 0;
+  padding: 0.4em;
+  border-radius: 0.25em;
+  outline: none;
+  border: 0px;
+  text-align: center;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+}
+
+.card {
+  /*padding: 0.5em 1em;*/
+  padding: 0.3em 0;
+  border-radius: 0.6em;
+  background-color: rgb(255 255 255 / 5%);
 }
