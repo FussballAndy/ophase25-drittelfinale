@@ -5,7 +5,7 @@
     import DrittelYesNo from "../components/drittel/DrittelYesNo.svelte";
 
     onMount(() => {
-        
+        // todo websocket
     })
 
     let questions = [

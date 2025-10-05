@@ -7,12 +7,15 @@
 
     async function checkToken(token: string) {
         if(inputRef) {
-            let response = await fetch("/api/token", {
+            let response = await fetch("http://127.0.0.1:8080/api/token", {
                 method: "POST",
                 body: token,
             }).then(res => res.json());
             if(response.status) {
                 userStore.set(token);
+                localStorage.setItem("token", token);
+            } else {
+                inputRef.value = "Falsch";
             }
             inputRef.disabled = false;
         }

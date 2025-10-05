@@ -4,6 +4,7 @@
     import DrittelPage from "./lib/pages/DrittelPage.svelte";
     import InGamePage from "./lib/pages/InGamePage.svelte";
     import TutorLogin from "./lib/components/TutorLogin.svelte";
+    import { userStore } from "./lib/stores";
 
     const INGAME_START_TIME = Date.UTC(2025, 9, 8, 15);
     const INGAME_END_TIME = Date.UTC(2025, 9, 8, 16, 20);
@@ -32,7 +33,9 @@
     {:else}
         Das Geländespiel ist nun vorbei! &#x1F44B; <br> Es hat uns viel Spaß gemacht. 
     {/if}
-    <TutorLogin />
+    {#if $userStore === null}
+        <TutorLogin />
+    {/if}
 </main>
 
 <style>
