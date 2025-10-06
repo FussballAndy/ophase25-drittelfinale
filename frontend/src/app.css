@@ -1,6 +1,6 @@
 :root {
   --main-bg-color: #242424;
-  --main-fg-color: rgb(255 255 255 / 87%);
+  --main-fg-color: hsl(0, 0%, 95%);
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
 
   background-color: var(--main-bg-color);
@@ -58,6 +58,16 @@ button:hover:not(:disabled) {
 }
 .red-btn:active {
   background-color: hsl(2, 80%, 40%);
+}
+
+.white-btn {
+  background-color: hsl(0, 0%, 95%);
+}
+.white-btn:hover {
+  background-color: hsl(0, 0%, 85%);
+}
+.white-btn:active {
+  background-color: hsl(0, 0%, 75%);
 }
 
 .flex\:column {

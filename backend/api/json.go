@@ -15,3 +15,14 @@ type JSONWinner struct {
 	Iteration uint8           `json:"iteration"`
 	Score     IterationWinner `json:"score"`
 }
+
+type JSONSubmission struct {
+	Question uint8 `json:"question"`
+	Answer   uint8 `json:"answer"`
+}
+
+type JSONQuestion struct {
+	Number  uint8    `json:"num"`
+	Prompt  string   `json:"prompt"`
+	Answers []string `json:"answers"`
+}

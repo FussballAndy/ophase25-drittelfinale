@@ -11,7 +11,7 @@
     const DRITTEL_START_TIME = Date.UTC(2025, 9, 8, 16, 38);
     const DRITTEL_END_TIME = Date.UTC(2025, 9, 8, 17);
 
-    let currentTime = $state(DRITTEL_START_TIME);
+    let currentTime = $state(INGAME_START_TIME);
 
     /*onMount(() => {
         let interval = setInterval(() => currentTime = Date.now(), 30 * 1000);

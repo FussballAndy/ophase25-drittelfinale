@@ -3,12 +3,15 @@
     import DrittelMC from "../components/drittel/DrittelMC.svelte";
     import DrittelNumber from "../components/drittel/DrittelNumber.svelte";
     import DrittelYesNo from "../components/drittel/DrittelYesNo.svelte";
+    import { wsStart, wsClose, questionStore, wsSubmitAnswer } from "../websocket";
+    import { get as getStoreValue } from "svelte/store";
 
     onMount(() => {
-        // todo websocket
+        wsStart()
+        return wsClose
     })
 
-    let questions = [
+    /*let questions = [
         {
             text: "Ist die Erde flach?",
             type: "yesno"
@@ -26,28 +29,31 @@
         }
     ]
     let currentQuestion = $state(2);
-    let curQ = $derived(questions[currentQuestion]);
-    function submit(e: Event, value: boolean | number | string) {
+    let curQ = $derived(questions[currentQuestion]);*/
+    function submit(e: Event, value: number) {
         e.preventDefault()
         // submit using currentQuestion and value
-        console.log(`Answered ${value} to Question ${currentQuestion}`)
+        const question = getStoreValue(questionStore)
+        if(question) {
+            const questionNr = question.num;
+            wsSubmitAnswer(questionNr, value)
+            console.log(`Answered ${value} to Question ${questionNr}`)
+        }
     }
 </script>
 
 <div class="surr flex:column">
-    <div class="question-box">
-        <span class="question">{curQ.text}</span>
-    </div>
-    <div class="answer-box flex:column">
-        <span>Antwort:</span>
-        {#if curQ.type === "yesno"}
-            <DrittelYesNo yes={e => submit(e,true)} no={e => submit(e,false)} />
-        {:else if curQ.type === "number"}
-            <DrittelNumber submit={submit} />
-        {:else if curQ.type === "mc"}
-            <DrittelMC answers={curQ.answers || []} submit={submit} />
-        {/if}
-    </div>
+    {#if $questionStore !== null}
+        <div class="question-box">
+            <span class="question">{$questionStore.prompt}</span>
+        </div>
+        <div class="answer-box flex:column">
+            <span>Antwort:</span>
+            <DrittelMC answers={$questionStore.answers} submit={submit} />
+        </div>
+    {:else}
+        <span>Warte auf die nächste Frage...</span>
+    {/if}
 </div>
 
 <style>

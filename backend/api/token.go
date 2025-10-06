@@ -23,5 +23,14 @@ func HandleToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	cookie := http.Cookie{
+		Name:     "session",
+		Value:    string(body_raw),
+		HttpOnly: true,
+		Secure:   true,
+	}
+
+	http.SetCookie(w, &cookie)
+
 	WriteOkEmpty(w)
 }

@@ -40,5 +40,7 @@ func HandleWinner(w http.ResponseWriter, r *http.Request) {
 
 	DBScores[index] = score
 
+	ResultsDirty.Store(true)
+
 	WriteOkEmpty(w)
 }

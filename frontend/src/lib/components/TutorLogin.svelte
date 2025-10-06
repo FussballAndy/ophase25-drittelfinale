@@ -51,13 +51,4 @@
         color: var(--main-fg-color);
         border: 2px solid var(--main-fg-color);
     }
-    .white-btn {
-        background-color: hsl(0, 0%, 95%);
-    }
-    .white-btn:hover {
-        background-color: hsl(0, 0%, 85%);
-    }
-    .white-btn:active {
-        background-color: hsl(0, 0%, 75%);
-    }
 </style>
