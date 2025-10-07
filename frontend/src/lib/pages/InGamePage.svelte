@@ -5,21 +5,13 @@
     import { userStore } from "../stores";
     import WinnerSubmission from "../components/ingame/WinnerSubmission.svelte";
 
-    let groups = [{
-        points: 0,
-        stations: [0, 0, 0]
-    },{
-        points: 1,
-        stations: []
-    }];
-
 </script>
 
 <div class="surr flex:column">
     <PointsCard students="50" tutors="20" />
     <GroupPointsCard />
     {#if $userStore === null}
-    <GroupInfoCard groups={groups} />
+    <GroupInfoCard />
     {:else}
     <WinnerSubmission />
     {/if}

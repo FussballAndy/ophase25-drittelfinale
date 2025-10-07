@@ -16,7 +16,7 @@ func HandleToken(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Printf("Token: %s\n", body_raw)
 
-	_, ok := DBTokens[string(body_raw)]
+	station, ok := DBTokens[string(body_raw)]
 
 	if !ok {
 		WriteError(w)
@@ -32,5 +32,5 @@ func HandleToken(w http.ResponseWriter, r *http.Request) {
 
 	http.SetCookie(w, &cookie)
 
-	WriteOkEmpty(w)
+	WriteOkData(w, station)
 }

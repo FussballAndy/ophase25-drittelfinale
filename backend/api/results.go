@@ -76,8 +76,7 @@ func buildResults() string {
 		fmt.Fprintf(&sb, "<tr><td>Gruppe %d</td>", index+1)
 		total := 0
 		for it_idx := range NUM_ITERATIONS {
-			entry_idx := it_idx + int(station_indicies[it_idx])*NUM_ITERATIONS
-			entry := DBScores[entry_idx]
+			entry := *GetScorePtr(station_indicies[it_idx], uint8(it_idx))
 			if entry == SCORE_STUDENT {
 				total++
 			}

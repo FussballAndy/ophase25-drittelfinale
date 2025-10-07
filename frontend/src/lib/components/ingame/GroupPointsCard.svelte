@@ -2,7 +2,7 @@
     <h2>Ergebnisse</h2>
     <p>
         Die Ergebnisse der einzelnen Gruppen findet man 
-        <a href="/results">hier &#x1F517;</a>.
+        <a href="http://127.0.0.1:8080/results" target="_blank">hier &#x1F517;</a>.
     </p>
 </div>
 

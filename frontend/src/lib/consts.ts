@@ -1,7 +1,7 @@
-export const INGAME_START_TIME = Date.UTC(2025, 9, 8, 15);
-export const INGAME_END_TIME = Date.UTC(2025, 9, 8, 16, 20);
-export const DRITTEL_START_TIME = Date.UTC(2025, 9, 8, 16, 38);
-export const DRITTEL_END_TIME = Date.UTC(2025, 9, 8, 17);
+export const INGAME_START_TIME = Date.UTC(2025, 9, 8, 15, 30);
+export const INGAME_END_TIME = Date.UTC(2025, 9, 8, 16, 48);
+export const DRITTEL_START_TIME = Date.UTC(2025, 9, 8, 16, 50);
+export const DRITTEL_END_TIME = Date.UTC(2025, 9, 8, 17, 30);
 
 export const TIME_SLOTS = [
     ["15:30", "15:45"],

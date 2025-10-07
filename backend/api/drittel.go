@@ -24,6 +24,11 @@ type DrittelClient struct {
 	Session string
 }
 
+type DrittelSub struct {
+	Session  string
+	Question uint8
+}
+
 var CookieMap sync.Map
 var ClientMutex sync.Mutex
 
@@ -100,14 +105,11 @@ func (c *DrittelClient) ReadMessages() {
 		timeNow := time.Now().UnixMilli()
 		CurrentMutex.RLock()
 		diff := timeNow - CurrentSubmissionStart
-		if 0 < diff && diff < 30_500 && answer.Question == CurrentQuestion {
-			submissions, ok := SubmissionMap.Load(c.Session)
-			if !ok {
-				submissions = &[NUM_SUBMISSIONS]uint8{}
-				SubmissionMap.Store(c.Session, submissions)
-			}
-			submissions.(*[NUM_SUBMISSIONS]uint8)[answer.Question] = answer.Answer
-			log.Println(submissions)
+		if 0 < diff && diff < 30_500 && answer.Question == CurrentQuestion-1 {
+			SubmissionMap.Store(DrittelSub{
+				Session:  c.Session,
+				Question: answer.Question,
+			}, answer.Answer)
 		}
 		CurrentMutex.RUnlock()
 	}
@@ -117,4 +119,14 @@ func genCookie() string {
 	bytes := make([]byte, 4)
 	rand.Read(bytes)
 	return hex.EncodeToString(bytes)
+}
+
+func BroadcastClients(message any) {
+	CookieMap.Range(func(key, value any) bool {
+		client := value.(*DrittelClient)
+		if client.Conn != nil {
+			client.Conn.WriteJSON(message)
+		}
+		return true
+	})
 }

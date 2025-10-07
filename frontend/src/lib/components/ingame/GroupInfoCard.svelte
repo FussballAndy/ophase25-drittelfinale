@@ -1,9 +1,8 @@
 <script lang="ts">
     import { TIME_SLOTS } from "../../consts";
     import { stationsStore } from "../../stores";
-    import type { Group } from "../../types";
 
-    let {groups}: {groups: Group[]} = $props();
+    let groups = stationsStore.groups;
     let selected: number = $state(0);
     let group = $derived(groups[selected]);
     let stations = $derived(group.stations.map(idx => stationsStore.stations[idx]));

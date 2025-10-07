@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -20,25 +21,27 @@ func HandleWinner(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.Iteration >= 3 {
+	if req.Iteration >= NUM_SCORES {
 		WriteError(w)
 		return
 	}
 
-	index := st*NUM_ITERATIONS + req.Iteration
+	scorePtr := GetScorePtr(st, req.Iteration)
 
-	if DBScores[index] != SCORE_UNSET {
+	if *scorePtr != SCORE_UNSET {
 		WriteError(w)
 		return
 	}
 
-	score := SCORE_STUDENT
+	*scorePtr = req.Score
 
-	if req.Score {
-		score = SCORE_TUTOR
+	ResultsChannel <- JSONStationResult{
+		Station:   st,
+		Iteration: req.Iteration,
+		Winner:    req.Score,
 	}
 
-	DBScores[index] = score
+	fmt.Println(DBScores)
 
 	ResultsDirty.Store(true)
 

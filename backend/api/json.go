@@ -5,15 +5,13 @@ type JSONData struct {
 	Data   any  `json:"data"`
 }
 
-type IterationWinner bool
-
-const WINNER_STUDENT IterationWinner = false
-const WINNER_TUTOR IterationWinner = true
+const WINNER_STUDENT uint8 = 0
+const WINNER_TUTOR uint8 = 1
 
 type JSONWinner struct {
-	Token     string          `json:"token"`
-	Iteration uint8           `json:"iteration"`
-	Score     IterationWinner `json:"score"`
+	Token     string `json:"token"`
+	Iteration uint8  `json:"iteration"`
+	Score     uint8  `json:"score"`
 }
 
 type JSONSubmission struct {
@@ -25,4 +23,25 @@ type JSONQuestion struct {
 	Number  uint8    `json:"num"`
 	Prompt  string   `json:"prompt"`
 	Answers []string `json:"answers"`
+}
+
+type AdminMessageKind string
+
+const MSG_REQUEST AdminMessageKind = "request"
+const MSG_ERROR AdminMessageKind = "error"
+const MSG_SEND AdminMessageKind = "send"
+
+type JSONAdmin struct {
+	Kind AdminMessageKind
+	Data any
+}
+
+type JSONStationResult struct {
+	Station   uint8 `json:"station"`
+	Winner    uint8 `json:"result"`
+	Iteration uint8 `json:"iter"`
+}
+
+type JSONDrittelConfig struct {
+	PointScaling uint8 `json:"scaling"`
 }

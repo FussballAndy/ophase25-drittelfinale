@@ -30,5 +30,6 @@ func GetAPIHandler() http.Handler {
 	mux.HandleFunc("GET /api/stations", api.HandleStations)
 	mux.HandleFunc("GET /api/groups", api.HandleGroups)
 	mux.HandleFunc("/api/drittel", api.HandleDrittel)
+	mux.HandleFunc("/api/admin", api.HandleAdmin)
 	return CorsMiddleware(mux)
 }
