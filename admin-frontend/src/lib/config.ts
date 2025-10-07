@@ -1,0 +1,1 @@
+export let config = {num_stations: 25}

@@ -12,18 +12,28 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var ADMIN_TOKEN = os.Getenv("ADMIN_SESSION")
+var ADMIN_TOKEN = func() string {
+	if tok, ok := os.LookupEnv("ADMIN_TOKEN"); ok {
+		return tok
+	} else {
+		return "admin"
+	}
+}()
+
 var ResultsChannel = make(chan JSONStationResult, 5)
 
 func HandleAdmin(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("session")
-	if err != nil {
+	fmt.Printf("%+v\n", r.Cookies())
+	cookie := r.URL.Query().Get("session")
+	if cookie == "" {
 		WriteError(w)
+		fmt.Println("No cookie")
 		return
 	}
-	token := cookie.Value
+	token := cookie
 	if token != ADMIN_TOKEN {
 		WriteError(w)
+		fmt.Println("Wrong cookie")
 		return
 	}
 	conn, err := upgrader.Upgrade(w, r, nil)
@@ -39,46 +49,40 @@ func HandleAdmin(w http.ResponseWriter, r *http.Request) {
 	}()
 }
 
+var ConfigDone = false
+
 func adminRoutine(conn *websocket.Conn) error {
 	err := conn.WriteJSON(JSONAdmin{
-		Kind: "num_iterations",
-		Data: NUM_ITERATIONS,
+		Kind: "num_stations",
+		Data: NUM_STATIONS,
 	})
 	if err != nil {
 		return err
 	}
-	finished := false
-	for !finished {
+	if !ConfigDone {
 		err = setupAdmin(conn)
 		if err != nil {
 			return err
 		}
 		err = conn.WriteJSON(JSONAdmin{
-			Kind: MSG_REQUEST,
-			Data: "confirmation",
+			Kind: "confirmation",
 		})
 		if err != nil {
 			return err
 		}
-		var response JSONAdmin
-		err = conn.ReadJSON(&response)
+		var conf any
+		err = conn.ReadJSON(&conf)
 		if err != nil {
 			return err
 		}
-		if response.Kind == "confirm" {
-			finished = true
-		} else {
-			switch response.Data.(string) {
-			case "groups":
-				GroupsInit = false
-			case "stations":
-				StationsInit = false
-			case "questions":
-				QuestionsInit = false
-			default:
-				fmt.Printf("Unknown type: %s\n", response.Data)
-			}
-		}
+		ConfigDone = true
+	}
+
+	err = conn.WriteJSON(JSONAdmin{
+		Kind: "ingame",
+	})
+	if err != nil {
+		return err
 	}
 
 	ingameDur := time.Until(consts.INGAME_END)
@@ -88,26 +92,32 @@ func adminRoutine(conn *websocket.Conn) error {
 		for {
 			select {
 			case result := <-ResultsChannel:
-				conn.WriteJSON(JSONAdmin{
+				err = conn.WriteJSON(JSONAdmin{
 					Kind: "result",
 					Data: result,
 				})
+				if err != nil {
+					return err
+				}
 			case <-ingameEndTimer.C:
 				break ingameLoop
 			}
 		}
 	}
 
-	err = drittelConfig(conn)
+	err = conn.WriteJSON(JSONAdmin{
+		Kind: "final",
+		Data: DBScores,
+	})
 	if err != nil {
 		return err
 	}
 
-	if time.Until(consts.DRITTEL_END) < 0 {
+	if time.Until(consts.DRITTEL_END) < -time.Minute*30 {
 		return nil
 	}
 
-	finished = false
+	finished := false
 
 	for !finished {
 		var msg JSONAdmin
@@ -128,6 +138,12 @@ func adminRoutine(conn *websocket.Conn) error {
 			if err != nil {
 				return err
 			}
+		case "front":
+			clientR, ok := CookieMap.Load(msg.Data)
+			client := clientR.(*DrittelClient)
+			if ok {
+				client.Front = !client.Front
+			}
 		}
 	}
 
@@ -136,54 +152,34 @@ func adminRoutine(conn *websocket.Conn) error {
 
 func setupAdmin(conn *websocket.Conn) error {
 	var err error
-	if !StationsInit {
-		err = conn.WriteJSON(JSONAdmin{
-			Kind: MSG_REQUEST,
-			Data: "stations",
-		})
-		if err != nil {
-			return err
-		}
-		var stationSlice []Station
-		err = conn.ReadJSON(&stationSlice)
-		if err != nil {
-			return err
-		}
-		DBStations = stationSlice
-		StationsInit = true
-	} else {
-		err = conn.WriteJSON(JSONAdmin{
-			Kind: "stations",
-			Data: DBStations,
-		})
-		if err != nil {
-			return err
-		}
+	err = conn.WriteJSON(JSONAdmin{
+		Kind: "stations",
+		Data: DBStations,
+	})
+	if err != nil {
+		return err
 	}
-	if !GroupsInit {
-		err = conn.WriteJSON(JSONAdmin{
-			Kind: MSG_REQUEST,
-			Data: "groups",
-		})
-		if err != nil {
-			return err
-		}
-		var groupSlice []Group
-		err = conn.ReadJSON(&groupSlice)
-		if err != nil {
-			return err
-		}
-		DBGroups = groupSlice
-		GroupsInit = true
-	} else {
-		err = conn.WriteJSON(JSONAdmin{
-			Kind: "groups",
-			Data: DBGroups,
-		})
-		if err != nil {
-			return err
-		}
+	var stationSlice []Station
+	err = conn.ReadJSON(&stationSlice)
+	if err != nil {
+		return err
 	}
+	DBStations = stationSlice
+
+	err = conn.WriteJSON(JSONAdmin{
+		Kind: "groups",
+		Data: DBGroups,
+	})
+	if err != nil {
+		return err
+	}
+	var groupSlice []Group
+	err = conn.ReadJSON(&groupSlice)
+	if err != nil {
+		return err
+	}
+	DBGroups = groupSlice
+
 	if !TokensInit {
 		for k := range DBTokens {
 			delete(DBTokens, k)
@@ -204,38 +200,35 @@ func setupAdmin(conn *websocket.Conn) error {
 			}
 			DBTokens[token] = math.MaxUint8
 		}
-		err = conn.WriteJSON(JSONAdmin{
-			Kind: "tokens",
-			Data: DBTokens,
-		})
-		if err != nil {
-			return err
-		}
 	}
-	if !QuestionsInit {
-		err = conn.WriteJSON(JSONAdmin{
-			Kind: MSG_REQUEST,
-			Data: "questions",
-		})
-		if err != nil {
-			return err
-		}
-		var questionSlice []JSONQuestion
-		err = conn.ReadJSON(&questionSlice)
-		if err != nil {
-			return err
-		}
-		DBQuestions = questionSlice
-		QuestionsInit = true
-	} else {
-		err = conn.WriteJSON(JSONAdmin{
-			Kind: "questions",
-			Data: DBQuestions,
-		})
-		if err != nil {
-			return err
-		}
+	err = conn.WriteJSON(JSONAdmin{
+		Kind: "tokens",
+		Data: DBTokens,
+	})
+	if err != nil {
+		return err
 	}
+	var empty any
+	err = conn.ReadJSON(&empty)
+	if err != nil {
+		return err
+	}
+	TokensInit = true
+
+	err = conn.WriteJSON(JSONAdmin{
+		Kind: "questions",
+		Data: DBQuestions,
+	})
+	if err != nil {
+		return err
+	}
+	var questionSlice []JSONQuestion
+	err = conn.ReadJSON(&questionSlice)
+	if err != nil {
+		return err
+	}
+	DBQuestions = questionSlice
+	fmt.Println("Finished setup")
 
 	return nil
 }
@@ -271,21 +264,6 @@ func clearQuestion() {
 	})
 
 	CurrentMutex.Unlock()
-}
-
-func drittelConfig(conn *websocket.Conn) error {
-	err := conn.WriteJSON(JSONAdmin{
-		Kind: "drittel_config",
-	})
-	if err != nil {
-		return err
-	}
-	var config JSONDrittelConfig
-	err = conn.ReadJSON(&config)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func sendResults(conn *websocket.Conn) error {

@@ -19,11 +19,8 @@ const NUM_SCORES = NUM_ITERATIONS + 1
 // --- Static Info ---
 var TokensInit = false
 var DBTokens = make(map[string]uint8)
-var StationsInit = false
 var DBStations = make([]Station, NUM_STATIONS)
-var GroupsInit = false
 var DBGroups = make([]Group, NUM_STATIONS)
-var QuestionsInit = false
 var DBQuestions = make([]JSONQuestion, 0)
 
 // --- Scores ---

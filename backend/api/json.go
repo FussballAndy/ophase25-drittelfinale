@@ -32,8 +32,8 @@ const MSG_ERROR AdminMessageKind = "error"
 const MSG_SEND AdminMessageKind = "send"
 
 type JSONAdmin struct {
-	Kind AdminMessageKind
-	Data any
+	Kind AdminMessageKind `json:"kind"`
+	Data any              `json:"data"`
 }
 
 type JSONStationResult struct {
