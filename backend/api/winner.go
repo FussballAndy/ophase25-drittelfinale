@@ -29,7 +29,7 @@ func HandleWinner(w http.ResponseWriter, r *http.Request) {
 	scorePtr := GetScorePtr(st, req.Iteration)
 
 	if *scorePtr != SCORE_UNSET {
-		WriteError(w)
+		WriteOkEmpty(w)
 		return
 	}
 

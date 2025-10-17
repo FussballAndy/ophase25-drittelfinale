@@ -1,11 +1,15 @@
 <script lang="ts">
-    import { drittelReady, pageStore, questionsStore, scalingStore, scoreStore } from "../lib/stores";
+    import QuestionResult from "../components/QuestionResult.svelte";
+    import { drittelReady, pageStore, questionActiveStore, questionResultStore, questionsStore, scalingStore, scoreStore } from "../lib/stores";
+    import { wsSend } from "../lib/websocket";
 
     let allEntries = $derived($scoreStore.flatMap(x => [x[0], x[1], x[2]]))
     let studs = $derived(allEntries.filter(x => x == 1).length)
-    let total = $derived(allEntries.filter(x => x).length)
+    let total = $derived(allEntries.filter(x => x !== undefined).length)
 
     let intraWinner = $state(-1)
+
+    let makeFrontValue = $state("")
 
     $effect(() => {
         let allIntra = $scoreStore.map(x => x[3])
@@ -28,13 +32,36 @@
         intraWinner = maxIndex
     })
 
-    function exportScores(e: Event) {
-        e.preventDefault();
+    function exportData(data: any) {
         const link = document.createElement('a');
         link.download = 'data.json';
-        const blob = new Blob([JSON.stringify($scoreStore)], {type: 'application/json'});
+        const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
         link.href = window.URL.createObjectURL(blob);
         link.click();
+    }
+
+    function exportScores(e: Event) {
+        e.preventDefault();
+        exportData($scoreStore)
+    }
+
+    function startQuestion(num: number) {
+        $questionActiveStore = num;
+        wsSend({
+            kind: "next",
+            data: num
+        })
+        setTimeout(() => {
+            $questionActiveStore = null
+        }, 30 * 1000)
+    }
+
+    function tryMakeFront(e: Event) {
+        e.preventDefault()
+        wsSend({
+            kind: "front",
+            data: makeFrontValue
+        })
     }
 </script>
 
@@ -74,9 +101,33 @@
     </div>
     {#if $drittelReady}
         <div class="flex:column">
-            <span>Aktuelle Frage:</span>
-            <span>{$questionsStore[0].prompt}</span>
+            <span>Toggle Front</span>
+            <div class="flex:row">
+                <input type="text" bind:value={makeFrontValue}>
+                <button onclick={tryMakeFront}>Submit</button>
+            </div>
         </div>
+        <div class="flex:column" style="border: 1px solid white; padding: 0.3em;">
+            {#each $questionsStore as question, idx (idx)}
+                <div class="flex:row" style="gap: 0.6em;">
+                    <span>{idx+1}. {question.prompt}</span>
+                    <button onclick={() => startQuestion(idx)} disabled={$questionActiveStore !== null}>Starten</button>
+                </div>
+            {/each}
+        </div>
+        <div class="flex:column" style="text-align: left;">
+            {#each $questionResultStore as result, idx (idx)}
+                <div class="flex:column">
+                    <span style="font-size: large;">Runde {idx+1}</span>
+                    <div class="flex:row">
+                        <QuestionResult submissions={Object.values(result).filter(x => !x.group)} name="Studies" question={idx} />
+                        <QuestionResult submissions={Object.values(result).filter(x => x.group)} name="Tuts" question={idx} />
+                    </div>
+                    <button onclick={() => exportData(result)}>Export</button>
+                </div>
+            {/each}
+        </div>
+        <button onclick={() => exportData($questionResultStore)}>Export All</button>
     {/if}
 </div>
 

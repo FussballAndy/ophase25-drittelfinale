@@ -1,4 +1,5 @@
 import { writable } from "svelte/store"
+import { API_BASE_URL } from "./consts"
 
 let websocket: WebSocket | null = null
 
@@ -16,9 +17,14 @@ export interface Submission {
 export let questionStore = writable<Question | null>(null)
 
 export function wsStart() {
-    websocket = new WebSocket("ws://localhost:8080/api/drittel")
+    websocket = new WebSocket(API_BASE_URL + "/api/drittel")
     websocket.addEventListener("message", e => {
-        questionStore.set(JSON.parse(e.data))
+        const question = JSON.parse(e.data)
+        if(question.num === 255) {
+            questionStore.set(null)
+        } else {
+            questionStore.set(question)
+        }
     })
 }
 

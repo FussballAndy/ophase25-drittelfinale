@@ -7,16 +7,27 @@ import (
 )
 
 func main() {
-	api.DBTokens["A"] = 0
+	api.PopulateDB()
 	api.SetupResultCreator()
 	mux := http.NewServeMux()
 
 	mux.Handle("/api/", GetAPIHandler())
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("true")) })
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./assets/index.html")
+	})
+	mux.HandleFunc("/index.css", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./assets/index.css")
+	})
+	mux.HandleFunc("/index.js", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./assets/index.js")
+	})
+	mux.HandleFunc("/logo.png", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./assets/logo.png")
+	})
 	mux.HandleFunc("/results", api.HandleResults)
 
 	s := &http.Server{
-		Addr:    "127.0.0.1:8080",
+		Addr:    ":8080",
 		Handler: mux,
 	}
 	log.Printf("Server starting at http://%s\n", s.Addr)

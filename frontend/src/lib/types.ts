@@ -4,7 +4,6 @@ export interface Station {
 }
 
 export interface Group {
-    points: number,
     stations: number[],
 }
 

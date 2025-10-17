@@ -6,7 +6,7 @@
     import IngamePage from "./pages/IngamePage.svelte";
 
     let token = $state("");
-    let init = $state(true)
+    let init = $state(false)
 
     function submit(e: Event) {
         e.preventDefault();

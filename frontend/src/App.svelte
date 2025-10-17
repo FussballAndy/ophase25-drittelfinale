@@ -6,12 +6,12 @@
     import TutorLogin from "./lib/components/TutorLogin.svelte";
     import { userStore } from "./lib/stores";
 
-    const INGAME_START_TIME = Date.UTC(2025, 9, 8, 15);
-    const INGAME_END_TIME = Date.UTC(2025, 9, 8, 16, 20);
-    const DRITTEL_START_TIME = Date.UTC(2025, 9, 8, 16, 38);
-    const DRITTEL_END_TIME = Date.UTC(2025, 9, 8, 17);
+    const INGAME_START_TIME = Date.UTC(2025, 9, 8, 13);
+    const INGAME_END_TIME = Date.UTC(2025, 9, 8, 14, 50);
+    const DRITTEL_START_TIME = Date.UTC(2025, 9, 8, 14, 50);
+    const DRITTEL_END_TIME = Date.UTC(2025, 9, 8, 16);
 
-    let currentTime = $state(INGAME_START_TIME);
+    let currentTime = $state(DRITTEL_START_TIME);
 
     /*onMount(() => {
         let interval = setInterval(() => currentTime = Date.now(), 30 * 1000);

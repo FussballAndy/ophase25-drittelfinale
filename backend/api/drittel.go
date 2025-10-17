@@ -25,8 +25,14 @@ type DrittelClient struct {
 }
 
 type DrittelSub struct {
-	Session  string
-	Question uint8
+	Session  string `json:"session"`
+	Question uint8  `json:"question"`
+}
+
+type DrittelAnswer struct {
+	Answer uint8 `json:"answer"`
+	Group  bool  `json:"group"`
+	Front  bool  `json:"front"`
 }
 
 var CookieMap sync.Map
@@ -34,7 +40,7 @@ var ClientMutex sync.Mutex
 
 var SubmissionMap sync.Map
 
-var CurrentSubmissionStart int64
+var CurrentSubmissionStart time.Time
 var CurrentQuestion uint8 = 0
 var CurrentMutex sync.RWMutex
 
@@ -84,13 +90,6 @@ func HandleDrittel(w http.ResponseWriter, r *http.Request) {
 	client.Session = sessionToken
 	CookieMap.Store(sessionToken, client)
 	go client.ReadMessages()
-
-	newQuestion := &JSONQuestion{
-		Number:  0,
-		Prompt:  "Hallo",
-		Answers: []string{"A", "B", "C"},
-	}
-	conn.WriteJSON(newQuestion)
 }
 
 func (c *DrittelClient) ReadMessages() {
@@ -102,14 +101,17 @@ func (c *DrittelClient) ReadMessages() {
 			return
 		}
 		log.Println(answer)
-		timeNow := time.Now().UnixMilli()
 		CurrentMutex.RLock()
-		diff := timeNow - CurrentSubmissionStart
-		if 0 < diff && diff < 30_500 && answer.Question == CurrentQuestion-1 {
+		diff := time.Since(CurrentSubmissionStart)
+		if 0 < diff && diff < 30_500 && answer.Question == CurrentQuestion {
 			SubmissionMap.Store(DrittelSub{
 				Session:  c.Session,
 				Question: answer.Question,
-			}, answer.Answer)
+			}, DrittelAnswer{
+				Answer: answer.Answer,
+				Group:  c.Group,
+				Front:  c.Front,
+			})
 		}
 		CurrentMutex.RUnlock()
 	}

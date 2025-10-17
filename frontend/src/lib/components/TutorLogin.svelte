@@ -1,5 +1,6 @@
 <script lang="ts">
-    import { userStore } from "../stores";
+    import { API_BASE_URL } from "../consts";
+    import { userStationStore, userStore } from "../stores";
 
     let active = $state(false);
     // svelte-ignore non_reactive_update
@@ -7,13 +8,15 @@
 
     async function checkToken(token: string) {
         if(inputRef) {
-            let response = await fetch("http://127.0.0.1:8080/api/token", {
+            let response = await fetch(API_BASE_URL + "/api/token", {
                 method: "POST",
                 body: token,
             }).then(res => res.json());
             if(response.status) {
                 userStore.set(token);
+                userStationStore.set(response.data)
                 localStorage.setItem("token", token);
+                localStorage.setItem("station", response.data)
             } else {
                 inputRef.value = "Falsch";
             }

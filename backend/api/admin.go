@@ -23,6 +23,7 @@ var ADMIN_TOKEN = func() string {
 var ResultsChannel = make(chan JSONStationResult, 5)
 
 func HandleAdmin(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("Admin: %s\n", ADMIN_TOKEN)
 	fmt.Printf("%+v\n", r.Cookies())
 	cookie := r.URL.Query().Get("session")
 	if cookie == "" {
@@ -75,11 +76,32 @@ func adminRoutine(conn *websocket.Conn) error {
 		if err != nil {
 			return err
 		}
+		StoreDB()
 		ConfigDone = true
+	} else {
+		type JSONFullDump struct {
+			Tokens    map[string]uint8 `json:"tokens"`
+			Stations  []Station        `json:"stations"`
+			Groups    []Group          `json:"groups"`
+			Questions []Question       `json:"questions"`
+		}
+		err = conn.WriteJSON(JSONAdmin{
+			Kind: "fulldump",
+			Data: JSONFullDump{
+				Tokens:    DBTokens,
+				Stations:  DBStations,
+				Groups:    DBGroups,
+				Questions: DBQuestions,
+			},
+		})
+		if err != nil {
+			return err
+		}
 	}
 
 	err = conn.WriteJSON(JSONAdmin{
 		Kind: "ingame",
+		Data: DBScores,
 	})
 	if err != nil {
 		return err
@@ -99,6 +121,7 @@ func adminRoutine(conn *websocket.Conn) error {
 				if err != nil {
 					return err
 				}
+				fmt.Println("Sent one result")
 			case <-ingameEndTimer.C:
 				break ingameLoop
 			}
@@ -113,38 +136,46 @@ func adminRoutine(conn *websocket.Conn) error {
 		return err
 	}
 
-	if time.Until(consts.DRITTEL_END) < -time.Minute*30 {
-		return nil
+	//if time.Until(consts.DRITTEL_END) >= -time.Minute*30 {
+	if true {
+		finished := false
+
+		for !finished {
+			var msg JSONAdmin
+			err = conn.ReadJSON(&msg)
+			if err != nil {
+				return err
+			}
+			switch msg.Kind {
+			case "next":
+				err = handleNextQuestion(conn, uint8(msg.Data.(float64)))
+				if err != nil {
+					return err
+				}
+			case "clear":
+				clearQuestion()
+			case "finished":
+				finished = true
+			case "front":
+				clientR, ok := CookieMap.Load(msg.Data)
+				if ok {
+					client := clientR.(*DrittelClient)
+					client.Front = !client.Front
+				}
+				err = conn.WriteJSON(JSONAdmin{
+					Kind: "front",
+					Data: ok,
+				})
+				if err != nil {
+					return err
+				}
+			}
+		}
 	}
 
-	finished := false
-
-	for !finished {
-		var msg JSONAdmin
-		err = conn.ReadJSON(&msg)
-		if err != nil {
-			return err
-		}
-		switch msg.Kind {
-		case "next":
-			err = handleNextQuestion(conn)
-			if err != nil {
-				return err
-			}
-		case "clear":
-			clearQuestion()
-		case "finished":
-			err = sendResults(conn)
-			if err != nil {
-				return err
-			}
-		case "front":
-			clientR, ok := CookieMap.Load(msg.Data)
-			client := clientR.(*DrittelClient)
-			if ok {
-				client.Front = !client.Front
-			}
-		}
+	err = sendResults(conn)
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -222,7 +253,7 @@ func setupAdmin(conn *websocket.Conn) error {
 	if err != nil {
 		return err
 	}
-	var questionSlice []JSONQuestion
+	var questionSlice []Question
 	err = conn.ReadJSON(&questionSlice)
 	if err != nil {
 		return err
@@ -233,29 +264,54 @@ func setupAdmin(conn *websocket.Conn) error {
 	return nil
 }
 
-func handleNextQuestion(conn *websocket.Conn) error {
+func handleNextQuestion(conn *websocket.Conn, nextQuestion uint8) error {
 	questionsLen := len(DBQuestions)
 	CurrentMutex.Lock()
-	if CurrentQuestion >= uint8(questionsLen) {
+	if nextQuestion >= uint8(questionsLen) {
 		return conn.WriteJSON(JSONAdmin{
 			Kind: "end",
 		})
 	}
 
-	BroadcastClients(DBQuestions[CurrentQuestion])
+	rawQuestion := DBQuestions[nextQuestion]
 
-	CurrentQuestion++
+	BroadcastClients(JSONQuestion{
+		Number:  nextQuestion,
+		Prompt:  rawQuestion.Prompt,
+		Answers: rawQuestion.Answers,
+	})
+
+	CurrentQuestion = nextQuestion
+	CurrentSubmissionStart = time.Now()
 
 	CurrentMutex.Unlock()
+
+	go func() {
+		timer := time.NewTimer(time.Second * 31)
+		<-timer.C
+		submissions := make(map[string]DrittelAnswer)
+		SubmissionMap.Range(func(key, value any) bool {
+			key1 := key.(DrittelSub)
+			v1 := value.(DrittelAnswer)
+			if key1.Question == nextQuestion {
+				submissions[key1.Session] = v1
+			}
+			return true
+		})
+		conn.WriteJSON(JSONAdmin{
+			Kind: "submissions",
+			Data: submissions,
+		})
+		clearQuestion()
+	}()
 
 	return nil
 }
 
 func clearQuestion() {
 	CurrentMutex.Lock()
-	if CurrentQuestion > 0 {
-		CurrentQuestion--
-	}
+
+	CurrentQuestion = 255
 
 	BroadcastClients(JSONQuestion{
 		Number:  255,
@@ -275,9 +331,23 @@ func sendResults(conn *websocket.Conn) error {
 		return err
 	}
 
-	resultMap := make(map[DrittelSub]uint8, 200)
+	type ResultDrittel struct {
+		Question uint8 `json:"question"`
+		Answer   uint8 `json:"answer"`
+		Group    bool  `json:"group"`
+		Front    bool  `json:"front"`
+	}
+
+	resultMap := make([]ResultDrittel, 200)
 	SubmissionMap.Range(func(key, value any) bool {
-		resultMap[key.(DrittelSub)] = value.(uint8)
+		k1 := key.(DrittelSub)
+		v1 := value.(DrittelAnswer)
+		resultMap = append(resultMap, ResultDrittel{
+			Question: k1.Question,
+			Answer:   v1.Answer,
+			Group:    v1.Group,
+			Front:    v1.Front,
+		})
 		return true
 	})
 

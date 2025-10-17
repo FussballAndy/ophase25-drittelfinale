@@ -8,7 +8,6 @@
 </script>
 
 <div class="surr flex:column">
-    <PointsCard students="50" tutors="20" />
     <GroupPointsCard />
     {#if $userStore === null}
     <GroupInfoCard />
